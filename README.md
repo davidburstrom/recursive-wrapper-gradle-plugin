@@ -45,5 +45,5 @@ Copyright 2023 David Burström.
 
 # Acknowledgements
 
-* [Nelson Osacky](nelson@osacky.com) - for invaluable Gradle insights
+* [Nelson Osacky](mailto:nelson@osacky.com) - for invaluable Gradle insights
 * [Remco Mokveld](https://github.com/remcomokveld) - for bringing the problem to my attention in the first place
