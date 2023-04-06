@@ -23,7 +23,6 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
 import java.util.Properties;
 import java.util.stream.Collectors;
@@ -68,7 +67,7 @@ class RecursiveWrapperPluginTest {
     writeSettingsScript(projectDir, "", "includeBuild(\"subproject\")");
     Path subprojectDir = createIncludedProject(projectDir, "subproject", "");
 
-    bootstrapWrappers(projectDir, subprojectDir);
+    bootstrapWrappers(projectDir);
 
     writeProjectBuildScriptWithPluginsBlock(projectDir);
 
@@ -90,7 +89,7 @@ class RecursiveWrapperPluginTest {
 
     Path subprojectDir = createIncludedProject(projectDir, "dir/subproject", "");
 
-    bootstrapWrappers(projectDir, subprojectDir);
+    bootstrapWrappers(projectDir);
 
     writeProjectBuildScriptWithPluginsBlock(projectDir);
 
@@ -120,7 +119,7 @@ class RecursiveWrapperPluginTest {
         createIncludedProject(projectDir, "subproject", "includeBuild(\"subsubproject\")");
     Path subsubprojectDir = createIncludedProject(subprojectDir, "subsubproject", "");
 
-    bootstrapWrappers(projectDir, subprojectDir, subsubprojectDir);
+    bootstrapWrappers(projectDir);
     writeProjectBuildScriptWithPluginsBlock(projectDir);
 
     getGradleRunner(projectDir)
@@ -144,7 +143,7 @@ class RecursiveWrapperPluginTest {
     writeSettingsScript(projectDir, "pluginManagement { includeBuild(\"subproject\") }\n", "");
     Path subprojectDir = createIncludedProject(projectDir, "subproject", "");
 
-    bootstrapWrappers(projectDir, subprojectDir);
+    bootstrapWrappers(projectDir);
     writeProjectBuildScriptWithPluginsBlock(projectDir);
 
     getGradleRunner(projectDir)
@@ -169,7 +168,7 @@ class RecursiveWrapperPluginTest {
 
     Path subprojectDir = createIncludedProject(projectDir, "subproject", "");
 
-    bootstrapWrappers(projectDir, subprojectDir);
+    bootstrapWrappers(projectDir);
 
     writeProjectBuildScriptWithPluginsBlock(projectDir);
 
@@ -206,7 +205,7 @@ class RecursiveWrapperPluginTest {
     writeSettingsScript(projectDir, "", "includeBuild(\"subproject\")");
     Path subprojectDir = createIncludedProject(projectDir, "subproject", "");
 
-    bootstrapWrappers(projectDir, subprojectDir);
+    bootstrapWrappers(projectDir);
     writeProjectBuildScriptWithPluginsBlock(projectDir);
     writeProjectBuildScriptWithPluginsBlock(subprojectDir);
 
@@ -246,9 +245,9 @@ class RecursiveWrapperPluginTest {
   void failsIfTestingSystemPropertyIsNotSuppliedInArguments(@TempDir Path projectDir)
       throws IOException {
     writeSettingsScript(projectDir, "", "includeBuild(\"subproject\")");
-    Path subprojectDir = createIncludedProject(projectDir, "subproject", "");
+    createIncludedProject(projectDir, "subproject", "");
 
-    bootstrapWrappers(projectDir, subprojectDir);
+    bootstrapWrappers(projectDir);
     writeProjectBuildScriptWithPluginsBlock(projectDir);
 
     BuildResult buildResult =
@@ -262,19 +261,12 @@ class RecursiveWrapperPluginTest {
             .contains(Constants.GROUP + ":" + Constants.ID + ":" + Constants.VERSION));
   }
 
-  /**
-   * Invokes Gradle in order to write the wrapper infrastructure in the given directory, as well as
-   * any other given directories.
-   */
-  private static void bootstrapWrappers(final Path directory, Path... otherDirectories)
-      throws IOException {
+  /** Invokes Gradle in order to write the wrapper infrastructure in the given directory. */
+  private static void bootstrapWrappers(final Path directory) {
     getGradleRunner(directory)
         .withArguments(":wrapper", "--stacktrace")
         .withProjectDir(directory.toFile())
         .build();
-    for (final Path otherDirectory : otherDirectories) {
-      copyWrapper(directory, otherDirectory);
-    }
   }
 
   private static GradleRunner getGradleRunner(@Nonnull Path projectDir) {
@@ -321,24 +313,6 @@ class RecursiveWrapperPluginTest {
     sb.append("}\n");
     sb.append(settingsPostamble);
     return sb.toString();
-  }
-
-  private static void copyWrapper(@Nonnull final Path sourceDir, @Nonnull final Path destinationDir)
-      throws IOException {
-    copyWithDirs(sourceDir, destinationDir, Paths.get("gradlew"));
-    copyWithDirs(sourceDir, destinationDir, Paths.get("gradlew.bat"));
-    copyWithDirs(sourceDir, destinationDir, Paths.get("gradle/wrapper/gradle-wrapper.jar"));
-    copyWithDirs(sourceDir, destinationDir, Paths.get("gradle/wrapper/gradle-wrapper.properties"));
-  }
-
-  private static void copyWithDirs(
-      @Nonnull final Path sourceDir, @Nonnull final Path destinationDir, @Nonnull final Path file)
-      throws IOException {
-    Path destinationFile = destinationDir.resolve(file);
-    if (!Files.exists(destinationFile.getParent())) {
-      Files.createDirectories(destinationFile.getParent());
-    }
-    Files.copy(sourceDir.resolve(file), destinationFile);
   }
 
   private static void writeProjectBuildScriptWithPluginsBlock(@Nonnull final Path projectDir)

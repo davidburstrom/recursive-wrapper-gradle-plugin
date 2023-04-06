@@ -59,13 +59,24 @@ public class RecursiveWrapperPlugin implements Plugin<Project> {
     List<TaskProvider<Exec>> includedBuildWrapperExecs =
         gradle.getIncludedBuilds().stream()
             .map(
-                includedBuild ->
-                    tasks.register(
-                        "wrapper" + includedBuild.getName(),
-                        Exec.class,
-                        task -> {
-                          task.setWorkingDir(includedBuild.getProjectDir());
-                        }))
+                includedBuild -> {
+                  TaskProvider<WrapperBootstrapTask> bootstrapWrapper =
+                      tasks.register(
+                          "bootstrapWrapper" + includedBuild.getName(),
+                          WrapperBootstrapTask.class,
+                          task -> {
+                            task.rootProjectDir = project.getProjectDir();
+                            task.includedBuildDir = includedBuild.getProjectDir();
+                          });
+
+                  return tasks.register(
+                      "wrapper" + includedBuild.getName(),
+                      Exec.class,
+                      task -> {
+                        task.setWorkingDir(includedBuild.getProjectDir());
+                        task.dependsOn(bootstrapWrapper);
+                      });
+                })
             .collect(Collectors.toList());
 
     tasks

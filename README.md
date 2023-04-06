@@ -15,7 +15,8 @@ plugins {
 }
 ```
 
-and the plugin will deal with the rest when the `:wrapper` task is invoked
+and the plugin will deal with the rest when the `:wrapper` task is invoked, propagating
+relevant values, and even boostrapping the wrapper files if necessary.
 
 For a Groovy `build.gradle` the equivalent is:
 
@@ -31,8 +32,10 @@ The plugin has been tested on all Gradle versions from 6.0.1 to 8.1.0-rc-2.
 
 ## Releases
 
+* 0.1.0-beta-2
+  * Support bootstrapping Gradle Wrapper files in included builds if they are missing.
 * 0.1.0-beta-1
-  * The initial release
+  * The initial release.
 
 ## License
 
