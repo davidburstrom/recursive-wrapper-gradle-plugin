@@ -29,9 +29,6 @@ All standard `:wrapper` arguments are supported, e.g. `--gradle-distribution-sha
 
 The plugin has been tested on all Gradle versions from 6.0.1 to 8.1.0-rc-2.
 
-Please note that builds included from the `pluginManagement { }` block are not updated, as Gradle has no
-API to access them.
-
 ## Releases
 
 * 0.1.0-beta-1

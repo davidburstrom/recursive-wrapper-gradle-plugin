@@ -45,7 +45,7 @@ class RecursiveWrapperPluginTest {
 
   @Test
   void updatesWithNoIncludedBuild(@TempDir Path projectDir) throws IOException {
-    writeSettingsScript(projectDir, "");
+    writeSettingsScript(projectDir, "", "");
 
     bootstrapWrappers(projectDir);
 
@@ -65,7 +65,7 @@ class RecursiveWrapperPluginTest {
 
   @Test
   void updatesOneIncludedBuild(@TempDir Path projectDir) throws IOException {
-    writeSettingsScript(projectDir, "includeBuild(\"subproject\")");
+    writeSettingsScript(projectDir, "", "includeBuild(\"subproject\")");
     Path subprojectDir = createIncludedProject(projectDir, "subproject", "");
 
     bootstrapWrappers(projectDir, subprojectDir);
@@ -86,7 +86,7 @@ class RecursiveWrapperPluginTest {
 
   @Test
   void updatesOneIncludedBuildInDistalDirectory(@TempDir Path projectDir) throws IOException {
-    writeSettingsScript(projectDir, "includeBuild(\"dir/subproject\")\n");
+    writeSettingsScript(projectDir, "", "includeBuild(\"dir/subproject\")\n");
 
     Path subprojectDir = createIncludedProject(projectDir, "dir/subproject", "");
 
@@ -115,7 +115,7 @@ class RecursiveWrapperPluginTest {
 
   @Test
   void updatesTransitivelyIncludedBuilds(@TempDir Path projectDir) throws IOException {
-    writeSettingsScript(projectDir, "includeBuild(\"subproject\")");
+    writeSettingsScript(projectDir, "", "includeBuild(\"subproject\")");
     Path subprojectDir =
         createIncludedProject(projectDir, "subproject", "includeBuild(\"subsubproject\")");
     Path subsubprojectDir = createIncludedProject(subprojectDir, "subsubproject", "");
@@ -140,8 +140,32 @@ class RecursiveWrapperPluginTest {
   }
 
   @Test
+  void updatesIncludedBuildFromPluginManagement(@TempDir Path projectDir) throws IOException {
+    writeSettingsScript(projectDir, "pluginManagement { includeBuild(\"subproject\") }\n", "");
+    Path subprojectDir = createIncludedProject(projectDir, "subproject", "");
+
+    bootstrapWrappers(projectDir, subprojectDir);
+    writeProjectBuildScriptWithPluginsBlock(projectDir);
+
+    getGradleRunner(projectDir)
+        .withArguments(
+            ":wrapper",
+            "--distribution-type=all",
+            "--stacktrace",
+            RecursiveWrapperPlugin.TESTING_PROPERTY_ARG)
+        .build();
+
+    assertWrapperPropertyEquals(
+        subprojectDir,
+        "distributionUrl",
+        "https://services.gradle.org/distributions/gradle-"
+            + System.getProperty("GRADLE_VERSION")
+            + "-all.zip");
+  }
+
+  @Test
   void setsExplicitProperties(@TempDir Path projectDir) throws IOException {
-    writeSettingsScript(projectDir, "includeBuild(\"subproject\")");
+    writeSettingsScript(projectDir, "", "includeBuild(\"subproject\")");
 
     Path subprojectDir = createIncludedProject(projectDir, "subproject", "");
 
@@ -179,7 +203,7 @@ class RecursiveWrapperPluginTest {
   @Test
   void includedBuildCanHavePluginAppliedWithoutConflict(@TempDir Path projectDir)
       throws IOException {
-    writeSettingsScript(projectDir, "includeBuild(\"subproject\")");
+    writeSettingsScript(projectDir, "", "includeBuild(\"subproject\")");
     Path subprojectDir = createIncludedProject(projectDir, "subproject", "");
 
     bootstrapWrappers(projectDir, subprojectDir);
@@ -205,7 +229,7 @@ class RecursiveWrapperPluginTest {
   @Test
   void cannotIncludeProjectsWithSameLeafName(@TempDir Path projectDir) throws IOException {
     writeSettingsScript(
-        projectDir, "includeBuild(\"dir1/subproject\"); includeBuild(\"dir2/subproject\")");
+        projectDir, "", "includeBuild(\"dir1/subproject\"); includeBuild(\"dir2/subproject\")");
 
     createIncludedProject(projectDir, "dir1/subproject", "");
     createIncludedProject(projectDir, "dir2/subproject", "");
@@ -221,7 +245,7 @@ class RecursiveWrapperPluginTest {
   @Test
   void failsIfTestingSystemPropertyIsNotSuppliedInArguments(@TempDir Path projectDir)
       throws IOException {
-    writeSettingsScript(projectDir, "includeBuild(\"subproject\")");
+    writeSettingsScript(projectDir, "", "includeBuild(\"subproject\")");
     Path subprojectDir = createIncludedProject(projectDir, "subproject", "");
 
     bootstrapWrappers(projectDir, subprojectDir);
@@ -263,25 +287,29 @@ class RecursiveWrapperPluginTest {
 
   @NotNull
   private static Path createIncludedProject(
-      final Path projectDir, final String relativePath, final String extraSettings)
+      final Path projectDir, final String relativePath, final String settingsPostamble)
       throws IOException {
     Path includedProjectDir = projectDir.resolve(relativePath);
     Files.createDirectories(includedProjectDir);
-    writeSettingsScript(includedProjectDir, extraSettings);
+    writeSettingsScript(includedProjectDir, "", settingsPostamble);
     return includedProjectDir;
   }
 
-  private static void writeSettingsScript(final Path projectDir, final String extraSettings)
+  private static void writeSettingsScript(
+      @Nonnull final Path projectDir,
+      @Nonnull final String settingsPreamble,
+      @Nonnull final String settingsPostamble)
       throws IOException {
     Files.write(
         projectDir.resolve("settings.gradle.kts"),
-        getSettingsScriptWithPluginClasspath(extraSettings).getBytes(UTF_8));
+        getSettingsScriptWithPluginClasspath(settingsPreamble, settingsPostamble).getBytes(UTF_8));
   }
 
   @Nonnull
   private static String getSettingsScriptWithPluginClasspath(
-      @Nonnull final String extraSettingsScript) {
+      @Nonnull final String settingsPreamble, @Nonnull final String settingsPostamble) {
     StringBuilder sb = new StringBuilder();
+    sb.append(settingsPreamble);
     sb.append("buildscript {\n");
     sb.append("  dependencies {\n");
     String collect =
@@ -291,7 +319,7 @@ class RecursiveWrapperPluginTest {
     sb.append("    classpath(files(").append(collect).append("))\n");
     sb.append("  }\n");
     sb.append("}\n");
-    sb.append(extraSettingsScript);
+    sb.append(settingsPostamble);
     return sb.toString();
   }
 
