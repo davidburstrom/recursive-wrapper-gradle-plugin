@@ -4,7 +4,7 @@ When using [Gradle composite builds](https://docs.gradle.org/current/userguide/c
 each included build is an independent project and needs its own Gradle wrapper. Keeping these in sync
 and up to date can be tedious.
 
-What if it was possible to run `./gradlew :wrapper --gradle-version=8.1.0-rc-2` in the root project
+What if it was possible to run `./gradlew :wrapper --gradle-version=8.1.0-rc-3` in the root project
 and update the wrappers in all included projects at the same time?
 
 Simply apply the following plugin in the root project `build.gradle.kts`:
@@ -28,7 +28,7 @@ plugins {
 
 All standard `:wrapper` arguments are supported, e.g. `--gradle-distribution-sha256-sum`, etc.
 
-The plugin has been tested on all Gradle versions from 6.0.1 to 8.1.0-rc-2.
+The plugin has been tested on all Gradle versions from 6.0.1 to 8.1.0-rc-3.
 
 ## Releases
 
