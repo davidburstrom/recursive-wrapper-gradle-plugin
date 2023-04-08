@@ -4,4 +4,11 @@
 # Ignore Gradle build output directory
 build
 
+# Ignore IntelliJ project metadata
 .idea
+
+# Ignore macOS files
+.DS_Store
+
+# Ignore Vim swap files
+*.swp
