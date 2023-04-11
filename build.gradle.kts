@@ -101,6 +101,8 @@ val constantsGenerator by tasks.registering {
     val constantsDir = project.layout.buildDirectory.dir("generated/sources/constants/java")
     val outputFile =
         constantsDir.get().file("${packageName.replace(".", "/")}/Constants.java").asFile
+    val licenseFile = rootProject.file("config/license-header.txt")
+    inputs.file(licenseFile)
     inputs.property("version", version)
     inputs.property("pluginId", pluginId)
     inputs.property("group", project.group)
@@ -116,7 +118,7 @@ val constantsGenerator by tasks.registering {
         val version by properties
         val packageName by properties
         outputFile.writeText(
-            rootProject.file("config/license-header.txt").readText() +
+            licenseFile.readText() +
                     "package $packageName;\n" +
                     "/** Holds the current build version. */\n" +
                     "public final class Constants {\n" +
