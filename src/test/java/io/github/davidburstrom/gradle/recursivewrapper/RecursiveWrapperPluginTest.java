@@ -29,7 +29,6 @@ import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import org.gradle.testkit.runner.BuildResult;
 import org.gradle.testkit.runner.GradleRunner;
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -44,7 +43,7 @@ class RecursiveWrapperPluginTest {
 
   @Test
   void updatesWithNoIncludedBuild(@TempDir Path projectDir) throws IOException {
-    writeSettingsScript(projectDir, "", "");
+    SettingsFileWriter.create(projectDir).write();
 
     bootstrapWrappers(projectDir);
 
@@ -64,8 +63,8 @@ class RecursiveWrapperPluginTest {
 
   @Test
   void updatesOneIncludedBuild(@TempDir Path projectDir) throws IOException {
-    writeSettingsScript(projectDir, "", "includeBuild(\"subproject\")");
-    Path subprojectDir = createIncludedProject(projectDir, "subproject", "");
+    SettingsFileWriter.create(projectDir).setPostamble("includeBuild(\"subproject\")").write();
+    Path subprojectDir = IncludedProjectWriter.create(projectDir, "subproject").write();
 
     bootstrapWrappers(projectDir);
 
@@ -85,9 +84,11 @@ class RecursiveWrapperPluginTest {
 
   @Test
   void updatesOneIncludedBuildInDistalDirectory(@TempDir Path projectDir) throws IOException {
-    writeSettingsScript(projectDir, "", "includeBuild(\"dir/subproject\")\n");
+    SettingsFileWriter.create(projectDir)
+        .setPostamble("includeBuild(\"dir/subproject\")\n")
+        .write();
 
-    Path subprojectDir = createIncludedProject(projectDir, "dir/subproject", "");
+    Path subprojectDir = IncludedProjectWriter.create(projectDir, "dir/subproject").write();
 
     bootstrapWrappers(projectDir);
 
@@ -114,10 +115,13 @@ class RecursiveWrapperPluginTest {
 
   @Test
   void updatesTransitivelyIncludedBuilds(@TempDir Path projectDir) throws IOException {
-    writeSettingsScript(projectDir, "", "includeBuild(\"subproject\")");
+    SettingsFileWriter.create(projectDir).setPostamble("includeBuild(\"subproject\")").write();
     Path subprojectDir =
-        createIncludedProject(projectDir, "subproject", "includeBuild(\"subsubproject\")");
-    Path subsubprojectDir = createIncludedProject(subprojectDir, "subsubproject", "");
+        IncludedProjectWriter.create(projectDir, "subproject")
+            .setSettingsFileCreator(
+                SettingsFileWriter.create().setPostamble("includeBuild(\"subsubproject\")"))
+            .write();
+    Path subsubprojectDir = IncludedProjectWriter.create(subprojectDir, "subsubproject").write();
 
     bootstrapWrappers(projectDir);
     writeProjectBuildScriptWithPluginsBlock(projectDir);
@@ -140,8 +144,10 @@ class RecursiveWrapperPluginTest {
 
   @Test
   void updatesIncludedBuildFromPluginManagement(@TempDir Path projectDir) throws IOException {
-    writeSettingsScript(projectDir, "pluginManagement { includeBuild(\"subproject\") }\n", "");
-    Path subprojectDir = createIncludedProject(projectDir, "subproject", "");
+    SettingsFileWriter.create(projectDir)
+        .setPreamble("pluginManagement { includeBuild(\"subproject\") }\n")
+        .write();
+    Path subprojectDir = IncludedProjectWriter.create(projectDir, "subproject").write();
 
     bootstrapWrappers(projectDir);
     writeProjectBuildScriptWithPluginsBlock(projectDir);
@@ -164,9 +170,9 @@ class RecursiveWrapperPluginTest {
 
   @Test
   void setsExplicitProperties(@TempDir Path projectDir) throws IOException {
-    writeSettingsScript(projectDir, "", "includeBuild(\"subproject\")");
+    SettingsFileWriter.create(projectDir).setPostamble("includeBuild(\"subproject\")").write();
 
-    Path subprojectDir = createIncludedProject(projectDir, "subproject", "");
+    Path subprojectDir = IncludedProjectWriter.create(projectDir, "subproject").write();
 
     bootstrapWrappers(projectDir);
 
@@ -202,8 +208,8 @@ class RecursiveWrapperPluginTest {
   @Test
   void includedBuildCanHavePluginAppliedWithoutConflict(@TempDir Path projectDir)
       throws IOException {
-    writeSettingsScript(projectDir, "", "includeBuild(\"subproject\")");
-    Path subprojectDir = createIncludedProject(projectDir, "subproject", "");
+    SettingsFileWriter.create(projectDir).setPostamble("includeBuild(\"subproject\")").write();
+    Path subprojectDir = IncludedProjectWriter.create(projectDir, "subproject").write();
 
     bootstrapWrappers(projectDir);
     writeProjectBuildScriptWithPluginsBlock(projectDir);
@@ -227,11 +233,12 @@ class RecursiveWrapperPluginTest {
 
   @Test
   void cannotIncludeProjectsWithSameLeafName(@TempDir Path projectDir) throws IOException {
-    writeSettingsScript(
-        projectDir, "", "includeBuild(\"dir1/subproject\"); includeBuild(\"dir2/subproject\")");
+    SettingsFileWriter.create(projectDir)
+        .setPostamble("includeBuild(\"dir1/subproject\"); includeBuild(\"dir2/subproject\")")
+        .write();
 
-    createIncludedProject(projectDir, "dir1/subproject", "");
-    createIncludedProject(projectDir, "dir2/subproject", "");
+    IncludedProjectWriter.create(projectDir, "dir1/subproject").write();
+    IncludedProjectWriter.create(projectDir, "dir2/subproject").write();
 
     writeProjectBuildScriptWithPluginsBlock(projectDir);
 
@@ -244,8 +251,8 @@ class RecursiveWrapperPluginTest {
   @Test
   void failsIfTestingSystemPropertyIsNotSuppliedInArguments(@TempDir Path projectDir)
       throws IOException {
-    writeSettingsScript(projectDir, "", "includeBuild(\"subproject\")");
-    createIncludedProject(projectDir, "subproject", "");
+    SettingsFileWriter.create(projectDir).setPostamble("includeBuild(\"subproject\")").write();
+    IncludedProjectWriter.create(projectDir, "subproject").write();
 
     bootstrapWrappers(projectDir);
     writeProjectBuildScriptWithPluginsBlock(projectDir);
@@ -275,26 +282,6 @@ class RecursiveWrapperPluginTest {
         .withPluginClasspath()
         .withProjectDir(projectDir.toFile())
         .withGradleVersion(System.getProperty("GRADLE_VERSION"));
-  }
-
-  @NotNull
-  private static Path createIncludedProject(
-      final Path projectDir, final String relativePath, final String settingsPostamble)
-      throws IOException {
-    Path includedProjectDir = projectDir.resolve(relativePath);
-    Files.createDirectories(includedProjectDir);
-    writeSettingsScript(includedProjectDir, "", settingsPostamble);
-    return includedProjectDir;
-  }
-
-  private static void writeSettingsScript(
-      @Nonnull final Path projectDir,
-      @Nonnull final String settingsPreamble,
-      @Nonnull final String settingsPostamble)
-      throws IOException {
-    Files.write(
-        projectDir.resolve("settings.gradle.kts"),
-        getSettingsScriptWithPluginClasspath(settingsPreamble, settingsPostamble).getBytes(UTF_8));
   }
 
   @Nonnull
@@ -329,5 +316,71 @@ class RecursiveWrapperPluginTest {
     properties.load(
         Files.newBufferedReader(projectDir.resolve("gradle/wrapper/gradle-wrapper.properties")));
     assertEquals(value, properties.getProperty(key));
+  }
+
+  private static class SettingsFileWriter {
+    private Path projectDir;
+    private String settingsPreamble = "";
+    private String settingsPostamble = "";
+
+    static SettingsFileWriter create() {
+      return new SettingsFileWriter();
+    }
+
+    static SettingsFileWriter create(Path projectDir) {
+      return new SettingsFileWriter().setProjectDir(projectDir);
+    }
+
+    private SettingsFileWriter() {}
+
+    private SettingsFileWriter setProjectDir(final Path projectDir) {
+      this.projectDir = projectDir;
+      return this;
+    }
+
+    private SettingsFileWriter setPreamble(String settingsPreamble) {
+      this.settingsPreamble = settingsPreamble;
+      return this;
+    }
+
+    private SettingsFileWriter setPostamble(String settingsPostamble) {
+      this.settingsPostamble = settingsPostamble;
+      return this;
+    }
+
+    private void write() throws IOException {
+      Files.write(
+          projectDir.resolve("settings.gradle.kts"),
+          getSettingsScriptWithPluginClasspath(settingsPreamble, settingsPostamble)
+              .getBytes(UTF_8));
+    }
+  }
+
+  private static class IncludedProjectWriter {
+    private final Path parentProjectDir;
+    private final String name;
+    private SettingsFileWriter settingsFileWriter = SettingsFileWriter.create();
+
+    private IncludedProjectWriter(Path parentProjectDir, String name) {
+      this.parentProjectDir = parentProjectDir;
+      this.name = name;
+    }
+
+    static IncludedProjectWriter create(Path parentProjectDir, String name) {
+      return new IncludedProjectWriter(parentProjectDir, name);
+    }
+
+    private IncludedProjectWriter setSettingsFileCreator(
+        final SettingsFileWriter settingsFileWriter) {
+      this.settingsFileWriter = settingsFileWriter;
+      return this;
+    }
+
+    private Path write() throws IOException {
+      Path includedProjectDir = parentProjectDir.resolve(name);
+      Files.createDirectories(includedProjectDir);
+      settingsFileWriter.setProjectDir(includedProjectDir).write();
+      return includedProjectDir;
+    }
   }
 }
