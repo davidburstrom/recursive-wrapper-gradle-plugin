@@ -17,11 +17,15 @@ package io.github.davidburstrom.gradle.recursivewrapper;
 
 import static com.google.common.truth.Truth.assertThat;
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
+import com.vdurmont.semver4j.Semver;
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 import java.util.stream.Collectors;
@@ -250,6 +254,7 @@ class RecursiveWrapperPluginTest {
   @Test
   void failsIfTestingSystemPropertyIsNotSuppliedInArguments(@TempDir Path projectDir)
       throws IOException {
+    assumeGradleSupportsDependencyVerification();
     SettingsFileWriter.create(projectDir).setPostamble("includeBuild(\"subproject\")").write();
     IncludedProjectWriter.create(projectDir, "subproject").write();
 
@@ -263,6 +268,101 @@ class RecursiveWrapperPluginTest {
 
     assertThat(buildResult.getOutput())
         .contains(Constants.GROUP + ":" + Constants.ID + ":" + Constants.VERSION);
+  }
+
+  private static final String BARE_MINIMUM_DEPENDENCY_VERIFICATION =
+      "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+          + "<verification-metadata>\n"
+          + "   <configuration>\n"
+          + "      <verify-metadata>true</verify-metadata>\n"
+          + "      <verify-signatures>true</verify-signatures>\n"
+          + "    </configuration>\n"
+          + "</verification-metadata>";
+
+  private static final String BUILDSCRIPT_FAKE_DEPENDENCY =
+      "buildscript {\n"
+          + "    repositories {\n"
+          + "        maven {\n"
+          + "            url = uri(file(\"repo\"))\n"
+          + "            metadataSources {\n"
+          + "                artifact()\n"
+          + "            }\n"
+          + "        }\n"
+          + "    }\n"
+          + "    dependencies {\n"
+          + "        classpath(\"a:b:c\")\n"
+          + "    }\n"
+          + "}";
+
+  @Test
+  void passesIfSubprojectRequiresDependencyVerificationAndExplicitlyDisabled(
+      @TempDir Path projectDir) throws IOException {
+    assumeGradleSupportsDependencyVerification();
+    SettingsFileWriter.create(projectDir).setPostamble("includeBuild(\"subproject\")").write();
+    Path subprojectDir =
+        IncludedProjectWriter.create(projectDir, "subproject")
+            .setSettingsFileCreator(
+                SettingsFileWriter.create().addBuildscriptBlockSnippet(BUILDSCRIPT_FAKE_DEPENDENCY))
+            .write();
+    writeVerificationMetadata(subprojectDir);
+    writeFakeMavenRepo(subprojectDir);
+
+    bootstrapWrappers(projectDir);
+    writeProjectBuildScriptWithPluginsBlock(projectDir);
+
+    BuildResult buildResult =
+        getGradleRunner(projectDir)
+            .withArguments(
+                ":wrapper",
+                "--stacktrace",
+                "--dependency-verification=lenient",
+                RecursiveWrapperPlugin.TESTING_PROPERTY_ARG)
+            .build();
+
+    assertThat(buildResult.getOutput()).contains("failed verification");
+  }
+
+  @Test
+  void failsIfSubprojectRequiresDependencyVerification(@TempDir Path projectDir)
+      throws IOException {
+    assumeGradleSupportsDependencyVerification();
+    SettingsFileWriter.create(projectDir).setPostamble("includeBuild(\"subproject\")").write();
+    Path subprojectDir =
+        IncludedProjectWriter.create(projectDir, "subproject")
+            .setSettingsFileCreator(
+                SettingsFileWriter.create().addBuildscriptBlockSnippet(BUILDSCRIPT_FAKE_DEPENDENCY))
+            .write();
+    writeVerificationMetadata(subprojectDir);
+    writeFakeMavenRepo(subprojectDir);
+
+    bootstrapWrappers(projectDir);
+    writeProjectBuildScriptWithPluginsBlock(projectDir);
+
+    BuildResult buildResult =
+        getGradleRunner(projectDir)
+            .withArguments(":wrapper", "--stacktrace", RecursiveWrapperPlugin.TESTING_PROPERTY_ARG)
+            .buildAndFail();
+
+    assertThat(buildResult.getOutput()).contains("failed verification");
+  }
+
+  private static void assumeGradleSupportsDependencyVerification() {
+    assumeTrue(
+        new Semver(System.getProperty("GRADLE_VERSION"), Semver.SemverType.LOOSE)
+            .isGreaterThanOrEqualTo(new Semver("6.2.0", Semver.SemverType.LOOSE)));
+  }
+
+  private static void writeVerificationMetadata(final Path subprojectDir) throws IOException {
+    Files.createDirectories(subprojectDir.resolve("gradle"));
+    Files.write(
+        subprojectDir.resolve("gradle/verification-metadata.xml"),
+        BARE_MINIMUM_DEPENDENCY_VERIFICATION.getBytes(Charset.defaultCharset()));
+  }
+
+  private static void writeFakeMavenRepo(final Path subprojectDir) throws IOException {
+    Path artifactDirectory = subprojectDir.resolve("repo/a/b/c/");
+    Files.createDirectories(artifactDirectory);
+    Files.createFile(artifactDirectory.resolve("b-c.jar"));
   }
 
   /** Invokes Gradle in order to write the wrapper infrastructure in the given directory. */
@@ -283,17 +383,15 @@ class RecursiveWrapperPluginTest {
 
   @Nonnull
   private static String getSettingsScriptWithPluginClasspath(
-      @Nonnull final String settingsPreamble, @Nonnull final String settingsPostamble) {
+      final List<String> buildscriptBlockSnippets,
+      @Nonnull final String settingsPreamble,
+      @Nonnull final String settingsPostamble) {
     StringBuilder sb = new StringBuilder();
     sb.append(settingsPreamble);
     sb.append("buildscript {\n");
-    sb.append("  dependencies {\n");
-    String collect =
-        PLUGIN_CLASSPATH.stream()
-            .map(it -> "\"" + it.toString() + "\"")
-            .collect(Collectors.joining(", "));
-    sb.append("    classpath(files(").append(collect).append("))\n");
-    sb.append("  }\n");
+    for (final String buildscriptBlockSnippet : buildscriptBlockSnippets) {
+      sb.append(buildscriptBlockSnippet);
+    }
     sb.append("}\n");
     sb.append(settingsPostamble);
     return sb.toString();
@@ -320,6 +418,8 @@ class RecursiveWrapperPluginTest {
     private String settingsPreamble = "";
     private String settingsPostamble = "";
 
+    private final List<String> buildscriptBlockSnippets = new ArrayList<>();
+
     static SettingsFileWriter create() {
       return new SettingsFileWriter();
     }
@@ -328,7 +428,17 @@ class RecursiveWrapperPluginTest {
       return new SettingsFileWriter().setProjectDir(projectDir);
     }
 
-    private SettingsFileWriter() {}
+    private SettingsFileWriter() {
+      StringBuilder sb = new StringBuilder();
+      sb.append("  dependencies {\n");
+      String collect =
+          PLUGIN_CLASSPATH.stream()
+              .map(it -> "\"" + it.toString() + "\"")
+              .collect(Collectors.joining(", "));
+      sb.append("    classpath(files(").append(collect).append("))\n");
+      sb.append("  }\n");
+      addBuildscriptBlockSnippet(sb.toString());
+    }
 
     private SettingsFileWriter setProjectDir(final Path projectDir) {
       this.projectDir = projectDir;
@@ -345,10 +455,16 @@ class RecursiveWrapperPluginTest {
       return this;
     }
 
+    private SettingsFileWriter addBuildscriptBlockSnippet(String snippet) {
+      buildscriptBlockSnippets.add(snippet);
+      return this;
+    }
+
     private void write() throws IOException {
       Files.write(
           projectDir.resolve("settings.gradle.kts"),
-          getSettingsScriptWithPluginClasspath(settingsPreamble, settingsPostamble)
+          getSettingsScriptWithPluginClasspath(
+                  buildscriptBlockSnippets, settingsPreamble, settingsPostamble)
               .getBytes(UTF_8));
     }
   }

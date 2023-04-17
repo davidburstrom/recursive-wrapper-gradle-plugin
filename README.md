@@ -28,10 +28,16 @@ plugins {
 
 All standard `:wrapper` arguments are supported, e.g. `--gradle-distribution-sha256-sum`, etc.
 
+In case the root project is using Gradle dependency verification, it is either necessary to add the
+plugin verification information in the included builds, or to execute the wrapper task with
+`--dependency-verification=lenient`.
+
 The plugin has been tested on all Gradle versions from 6.0.1 to 8.1.0-rc-3.
 
 ## Releases
 
+* Unreleased
+  * Support temporarily disabling dependency verification in included builds.
 * 0.1.0-beta-2
   * Support bootstrapping Gradle Wrapper files in included builds if they are missing.
 * 0.1.0-beta-1

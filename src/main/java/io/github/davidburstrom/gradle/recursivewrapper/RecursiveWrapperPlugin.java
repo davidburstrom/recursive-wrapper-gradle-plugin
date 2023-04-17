@@ -167,6 +167,26 @@ public class RecursiveWrapperPlugin implements Plugin<Project> {
                 throw new RuntimeException("Unable to write the init script", e);
               }
 
+              try {
+                String dependencyVerificationMode;
+                switch (gradle.getStartParameter().getDependencyVerificationMode()) {
+                  case STRICT:
+                    dependencyVerificationMode = "strict";
+                    break;
+                  case LENIENT:
+                    dependencyVerificationMode = "lenient";
+                    break;
+                  case OFF:
+                    dependencyVerificationMode = "off";
+                    break;
+                  default:
+                    throw new AssertionError();
+                }
+                commandLine.add("--dependency-verification=" + dependencyVerificationMode);
+              } catch (NoClassDefFoundError ignore) {
+                // This functionality was added in Gradle 6.2
+              }
+
               /* As a convenience, any spawned builds will inherit the stacktrace setting. */
               if (gradle.getStartParameter().getShowStacktrace() == ShowStacktrace.ALWAYS) {
                 commandLine.add("--stacktrace");
