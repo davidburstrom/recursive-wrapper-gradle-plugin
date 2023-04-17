@@ -15,9 +15,8 @@
  */
 package io.github.davidburstrom.gradle.recursivewrapper;
 
+import static com.google.common.truth.Truth.assertThat;
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
@@ -245,7 +244,7 @@ class RecursiveWrapperPluginTest {
     BuildResult buildResult =
         getGradleRunner(projectDir).withArguments(":wrapper", "--stacktrace").buildAndFail();
 
-    assertTrue(buildResult.getOutput().contains("which is the same"));
+    assertThat(buildResult.getOutput()).contains("which is the same");
   }
 
   @Test
@@ -262,10 +261,8 @@ class RecursiveWrapperPluginTest {
             .withArguments(":wrapper", "--distribution-type=all", "--stacktrace")
             .buildAndFail();
 
-    assertTrue(
-        buildResult
-            .getOutput()
-            .contains(Constants.GROUP + ":" + Constants.ID + ":" + Constants.VERSION));
+    assertThat(buildResult.getOutput())
+        .contains(Constants.GROUP + ":" + Constants.ID + ":" + Constants.VERSION);
   }
 
   /** Invokes Gradle in order to write the wrapper infrastructure in the given directory. */
@@ -315,7 +312,7 @@ class RecursiveWrapperPluginTest {
     Properties properties = new Properties();
     properties.load(
         Files.newBufferedReader(projectDir.resolve("gradle/wrapper/gradle-wrapper.properties")));
-    assertEquals(value, properties.getProperty(key));
+    assertThat(value).isEqualTo(properties.getProperty(key));
   }
 
   private static class SettingsFileWriter {
