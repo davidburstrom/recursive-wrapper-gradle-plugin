@@ -203,7 +203,10 @@ public class RecursiveWrapperPlugin implements Plugin<Project> {
               includedBuildWrapperExecs.forEach(
                   includedBuildWrapper ->
                       includedBuildWrapper.configure(
-                          gradleBuild -> gradleBuild.setCommandLine(commandLine)));
+                          gradleBuild -> {
+                            gradleBuild.setCommandLine(commandLine);
+                            gradleBuild.environment("JAVA_HOME", System.getProperty("java.home"));
+                          }));
             });
   }
 

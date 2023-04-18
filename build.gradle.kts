@@ -43,6 +43,9 @@ tasks.withType<Test> {
 
 tasks.test {
     systemProperty("GRADLE_VERSION", GradleVersion.current().version)
+}
+
+tasks.withType<Test>() {
     javaLauncher.set(
         javaToolchains.launcherFor {
             languageVersion.set(JavaLanguageVersion.of(11))
