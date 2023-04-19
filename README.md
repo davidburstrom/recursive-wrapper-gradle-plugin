@@ -11,7 +11,7 @@ Simply apply the following plugin in the root project `build.gradle.kts`:
 
 ```kotlin
 plugins {
-    id("io.github.davidburstrom.recursive-wrapper") version "0.1.0-beta-1"
+    id("io.github.davidburstrom.recursive-wrapper") version "0.1.0-beta-3"
 }
 ```
 
@@ -22,7 +22,7 @@ For a Groovy `build.gradle` the equivalent is:
 
 ```groovy
 plugins {
-    id 'io.github.davidburstrom.recursive-wrapper' version '0.1.0-beta-1'
+    id 'io.github.davidburstrom.recursive-wrapper' version '0.1.0-beta-3'
 }
 ```
 
@@ -36,7 +36,7 @@ The plugin has been tested on all Gradle versions from 6.0.1 to 8.1.0.
 
 ## Releases
 
-* Unreleased
+* 0.1.0-beta-3
   * Support temporarily disabling dependency verification in included builds.
 * 0.1.0-beta-2
   * Support bootstrapping Gradle Wrapper files in included builds if they are missing.
