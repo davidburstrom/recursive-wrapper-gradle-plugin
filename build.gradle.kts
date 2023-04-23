@@ -65,7 +65,7 @@ versionCompatibility {
         dimensions {
             register("Gradle") {
                 versions.set(
-                    listOf("6.0.1", "6.1.1", "6.2.2", "6.3", "6.4.1", "6.5.1", "6.6.1", "6.7.1", "6.8.3", "6.9.2", "7.0.2", "7.1.1", "7.2", "7.3.3", "7.4.2", "7.5.1", "7.6.1", "8.0.2", "8.1")
+                    listOf("6.0.1", "6.1.1", "6.2.2", "6.3", "6.4.1", "6.5.1", "6.6.1", "6.7.1", "6.8.3", "6.9.2", "7.0.2", "7.1.1", "7.2", "7.3.3", "7.4.2", "7.5.1", "7.6.1", "8.0.2", "8.1.1")
                 )
                 if (GradleVersion.current().version !in versions.get()) {
                     throw GradleException("Could not find ${gradle.gradleVersion} in the compatibility test versions")
