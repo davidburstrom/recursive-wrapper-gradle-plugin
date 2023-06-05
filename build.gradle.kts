@@ -20,7 +20,7 @@ repositories {
 
 dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter:5.10.0-M1")
-    testImplementation("com.google.truth:truth:1.1.3")
+    testImplementation("com.google.truth:truth:1.1.4")
     testImplementation("com.vdurmont:semver4j:3.1.0")
     errorprone("com.google.errorprone:error_prone_core:$errorProneVersion")
 }
