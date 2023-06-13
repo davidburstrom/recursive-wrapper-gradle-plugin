@@ -26,11 +26,11 @@ dependencies {
 }
 
 tasks.named<JavaCompile>("compileJava").configure {
-    options.release.set(8)
+    options.release = 8
 }
 
 tasks.named<JavaCompile>("compileTestJava").configure {
-    options.release.set(11)
+    options.release = 11
 }
 
 tasks.withType(JavaCompile::class).configureEach {
@@ -46,11 +46,9 @@ tasks.test {
 }
 
 tasks.withType<Test>() {
-    javaLauncher.set(
-        javaToolchains.launcherFor {
-            languageVersion.set(JavaLanguageVersion.of(11))
-        }
-    )
+    javaLauncher = javaToolchains.launcherFor {
+        languageVersion = JavaLanguageVersion.of(11)
+    }
 }
 
 spotless {
@@ -64,9 +62,7 @@ versionCompatibility {
     tests {
         dimensions {
             register("Gradle") {
-                versions.set(
-                    listOf("6.0.1", "6.1.1", "6.2.2", "6.3", "6.4.1", "6.5.1", "6.6.1", "6.7.1", "6.8.3", "6.9.2", "7.0.2", "7.1.1", "7.2", "7.3.3", "7.4.2", "7.5.1", "7.6.1", "8.0.2", "8.1.1", "8.2-rc-2")
-                )
+                versions = listOf("6.0.1", "6.1.1", "6.2.2", "6.3", "6.4.1", "6.5.1", "6.6.1", "6.7.1", "6.8.3", "6.9.2", "7.0.2", "7.1.1", "7.2", "7.3.3", "7.4.2", "7.5.1", "7.6.1", "8.0.2", "8.1.1", "8.2-rc-2")
                 if (GradleVersion.current().version !in versions.get()) {
                     throw GradleException("Could not find ${gradle.gradleVersion} in the compatibility test versions")
                 }
@@ -76,11 +72,9 @@ versionCompatibility {
             val (gradleVersion) = versions
 
             testTask.systemProperty("GRADLE_VERSION", gradleVersion)
-            testTask.javaLauncher.set(
-                javaToolchains.launcherFor {
-                    languageVersion.set(JavaLanguageVersion.of(11))
-                }
-            )
+            testTask.javaLauncher = javaToolchains.launcherFor {
+                languageVersion = JavaLanguageVersion.of(11)
+            }
         }
     }
 }
@@ -90,14 +84,14 @@ tasks.named("build").configure {
 }
 
 gradlePlugin {
-    website.set("https://github.com/davidburstrom/recursive-wrapper-gradle-plugin")
-    vcsUrl.set("https://github.com/davidburstrom/recursive-wrapper-gradle-plugin")
+    website = "https://github.com/davidburstrom/recursive-wrapper-gradle-plugin"
+    vcsUrl = "https://github.com/davidburstrom/recursive-wrapper-gradle-plugin"
     plugins.register("plugin") {
         id = pluginId
         implementationClass = "$packageName.RecursiveWrapperPlugin"
         displayName = "Recursive Wrapper Gradle Plugin"
         description = "Updates the Gradle wrapper for all included projects in a single invocation."
-        tags.set(listOf("wrapper", "update", "composite", "recursive", "included", "project"))
+        tags = listOf("wrapper", "update", "composite", "recursive", "included", "project")
     }
 }
 
