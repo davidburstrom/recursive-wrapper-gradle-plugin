@@ -1,1 +1,1 @@
-rootProject.name = "recursive-wrapper"
+rootProject.name = "recursive-wrapper-gradle-plugin"
