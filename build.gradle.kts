@@ -56,6 +56,10 @@ spotless {
         googleJavaFormat(googleJavaFormatVersion)
         licenseHeaderFile(rootProject.file("config/license-header.txt"))
     }
+    kotlinGradle {
+        target("*.gradle.kts")
+        ktlint("0.50.0").editorConfigOverride(mapOf("ktlint_standard_trailing-comma-on-call-site" to "disabled"))
+    }
 }
 
 versionCompatibility {
@@ -95,7 +99,6 @@ gradlePlugin {
     }
 }
 
-
 val constantsGenerator by tasks.registering {
     val constantsDir = project.layout.buildDirectory.dir("generated/sources/constants/java")
     val outputFile =
@@ -118,16 +121,16 @@ val constantsGenerator by tasks.registering {
         val packageName by properties
         outputFile.writeText(
             licenseFile.readText() +
-                    "package $packageName;\n" +
-                    "/** Holds the current build version. */\n" +
-                    "public final class Constants {\n" +
-                    "  private Constants() {}\n" +
-                    "\n" +
-                    "  public static final String PLUGIN_ID = \"$pluginId\";\n" +
-                    "  public static final String GROUP = \"$group\";\n" +
-                    "  public static final String ID = \"$id\";\n" +
-                    "  public static final String VERSION = \"$version\";\n" +
-                    "}\n"
+                "package $packageName;\n" +
+                "/** Holds the current build version. */\n" +
+                "public final class Constants {\n" +
+                "  private Constants() {}\n" +
+                "\n" +
+                "  public static final String PLUGIN_ID = \"$pluginId\";\n" +
+                "  public static final String GROUP = \"$group\";\n" +
+                "  public static final String ID = \"$id\";\n" +
+                "  public static final String VERSION = \"$version\";\n" +
+                "}\n"
         )
     }
 }
@@ -135,4 +138,3 @@ val constantsGenerator by tasks.registering {
 sourceSets.main {
     java.srcDir(constantsGenerator)
 }
-
