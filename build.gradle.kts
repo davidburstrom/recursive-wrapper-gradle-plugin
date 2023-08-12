@@ -7,7 +7,7 @@ plugins {
     id("org.gradle.signing")
 }
 
-val errorProneVersion = "2.20.0"
+val errorProneVersion = "2.21.1"
 val googleJavaFormatVersion = "1.16.0"
 version = "0.1.0-SNAPSHOT"
 group = "io.github.davidburstrom.gradle.recursive-wrapper"
