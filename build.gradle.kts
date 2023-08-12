@@ -9,6 +9,7 @@ plugins {
 
 val errorProneVersion = "2.21.1"
 val googleJavaFormatVersion = "1.16.0"
+val ktlintVersion = "0.50.0"
 version = "0.1.0-SNAPSHOT"
 group = "io.github.davidburstrom.gradle.recursive-wrapper"
 val pluginId = "io.github.davidburstrom.recursive-wrapper"
@@ -16,6 +17,14 @@ val packageName = "io.github.davidburstrom.gradle.recursivewrapper"
 
 repositories {
     mavenCentral()
+}
+
+configurations {
+    register("dependencyUpdates")
+}
+
+dependencies {
+    "dependencyUpdates"("com.pinterest.ktlint:ktlint-bom:$ktlintVersion")
 }
 
 dependencies {
@@ -58,7 +67,7 @@ spotless {
     }
     kotlinGradle {
         target("*.gradle.kts")
-        ktlint("0.50.0").editorConfigOverride(mapOf("ktlint_standard_trailing-comma-on-call-site" to "disabled"))
+        ktlint(ktlintVersion).editorConfigOverride(mapOf("ktlint_standard_trailing-comma-on-call-site" to "disabled"))
     }
 }
 
