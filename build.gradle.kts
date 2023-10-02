@@ -9,7 +9,7 @@ plugins {
 
 val errorProneVersion = "2.22.0"
 val googleJavaFormatVersion = "1.16.0"
-val ktlintVersion = "0.50.0"
+val ktlintVersion = "1.0.0"
 version = "0.1.0-SNAPSHOT"
 group = "io.github.davidburstrom.gradle.recursive-wrapper"
 val pluginId = "io.github.davidburstrom.recursive-wrapper"
@@ -54,7 +54,7 @@ tasks.test {
     systemProperty("GRADLE_VERSION", GradleVersion.current().version)
 }
 
-tasks.withType<Test>() {
+tasks.withType<Test> {
     javaLauncher = javaToolchains.launcherFor {
         languageVersion = JavaLanguageVersion.of(11)
     }
