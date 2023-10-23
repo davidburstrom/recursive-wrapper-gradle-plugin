@@ -1,6 +1,6 @@
 plugins {
     id("com.diffplug.spotless") version "6.22.0"
-    id("com.github.ben-manes.versions") version "0.48.0"
+    id("com.github.ben-manes.versions") version "0.49.0"
     id("com.gradle.plugin-publish") version "1.2.1"
     id("io.github.davidburstrom.version-compatibility") version "0.5.0"
     id("net.ltgt.errorprone") version "3.1.0"
