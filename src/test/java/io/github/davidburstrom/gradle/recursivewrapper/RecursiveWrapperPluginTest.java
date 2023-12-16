@@ -55,7 +55,7 @@ class RecursiveWrapperPluginTest {
     writeProjectBuildScriptWithPluginsBlock(projectDir);
 
     getGradleRunner(projectDir)
-        .withArguments(getArguments(":wrapper", RecursiveWrapperPlugin.TESTING_PROPERTY_ARG))
+        .withArguments(getArguments(RecursiveWrapperPlugin.TESTING_PROPERTY_ARG))
         .build();
 
     assertWrapperPropertyEquals(
@@ -76,7 +76,7 @@ class RecursiveWrapperPluginTest {
     writeProjectBuildScriptWithPluginsBlock(projectDir);
 
     getGradleRunner(projectDir)
-        .withArguments(getArguments(":wrapper", RecursiveWrapperPlugin.TESTING_PROPERTY_ARG))
+        .withArguments(getArguments(RecursiveWrapperPlugin.TESTING_PROPERTY_ARG))
         .build();
 
     assertWrapperPropertyEquals(
@@ -100,7 +100,7 @@ class RecursiveWrapperPluginTest {
     writeProjectBuildScriptWithPluginsBlock(projectDir);
 
     getGradleRunner(projectDir)
-        .withArguments(getArguments(":wrapper", RecursiveWrapperPlugin.TESTING_PROPERTY_ARG))
+        .withArguments(getArguments(RecursiveWrapperPlugin.TESTING_PROPERTY_ARG))
         .build();
 
     assertWrapperPropertyEquals(
@@ -133,8 +133,7 @@ class RecursiveWrapperPluginTest {
 
     getGradleRunner(projectDir)
         .withArguments(
-            getArguments(
-                ":wrapper", "--distribution-type=all", RecursiveWrapperPlugin.TESTING_PROPERTY_ARG))
+            getArguments("--distribution-type=all", RecursiveWrapperPlugin.TESTING_PROPERTY_ARG))
         .build();
 
     assertWrapperPropertyEquals(
@@ -157,8 +156,7 @@ class RecursiveWrapperPluginTest {
 
     getGradleRunner(projectDir)
         .withArguments(
-            getArguments(
-                ":wrapper", "--distribution-type=all", RecursiveWrapperPlugin.TESTING_PROPERTY_ARG))
+            getArguments("--distribution-type=all", RecursiveWrapperPlugin.TESTING_PROPERTY_ARG))
         .build();
 
     assertWrapperPropertyEquals(
@@ -182,7 +180,6 @@ class RecursiveWrapperPluginTest {
     getGradleRunner(projectDir)
         .withArguments(
             getArguments(
-                ":wrapper",
                 "--gradle-distribution-url=https://services.gradle.org/distributions/gradle-8.0.2-bin.zip",
                 "--gradle-distribution-sha256-sum=ff7bf6a86f09b9b2c40bb8f48b25fc19cf2b2664fd1d220cd7ab833ec758d0d7",
                 RecursiveWrapperPlugin.TESTING_PROPERTY_ARG))
@@ -218,8 +215,7 @@ class RecursiveWrapperPluginTest {
 
     getGradleRunner(projectDir)
         .withArguments(
-            getArguments(
-                ":wrapper", "--distribution-type=all", RecursiveWrapperPlugin.TESTING_PROPERTY_ARG))
+            getArguments("--distribution-type=all", RecursiveWrapperPlugin.TESTING_PROPERTY_ARG))
         .build();
 
     assertWrapperPropertyEquals(
@@ -242,7 +238,7 @@ class RecursiveWrapperPluginTest {
     writeProjectBuildScriptWithPluginsBlock(projectDir);
 
     BuildResult buildResult =
-        getGradleRunner(projectDir).withArguments(getArguments(":wrapper")).buildAndFail();
+        getGradleRunner(projectDir).withArguments(getArguments()).buildAndFail();
 
     assertThat(buildResult.getOutput()).contains("which is the same");
   }
@@ -259,7 +255,7 @@ class RecursiveWrapperPluginTest {
 
     BuildResult buildResult =
         getGradleRunner(projectDir)
-            .withArguments(getArguments(":wrapper", "--distribution-type=all"))
+            .withArguments(getArguments("--distribution-type=all"))
             .buildAndFail();
 
     assertThat(buildResult.getOutput())
@@ -310,7 +306,6 @@ class RecursiveWrapperPluginTest {
         getGradleRunner(projectDir)
             .withArguments(
                 getArguments(
-                    ":wrapper",
                     "--dependency-verification=lenient",
                     RecursiveWrapperPlugin.TESTING_PROPERTY_ARG))
             .build();
@@ -336,7 +331,7 @@ class RecursiveWrapperPluginTest {
 
     BuildResult buildResult =
         getGradleRunner(projectDir)
-            .withArguments(getArguments(":wrapper", RecursiveWrapperPlugin.TESTING_PROPERTY_ARG))
+            .withArguments(getArguments(RecursiveWrapperPlugin.TESTING_PROPERTY_ARG))
             .buildAndFail();
 
     assertThat(buildResult.getOutput()).contains("failed verification");
@@ -364,7 +359,7 @@ class RecursiveWrapperPluginTest {
   /** Invokes Gradle in order to write the wrapper infrastructure in the given directory. */
   private static void bootstrapWrappers(final Path directory) {
     getGradleRunner(directory)
-        .withArguments(getArguments(":wrapper"))
+        .withArguments(getArguments())
         .withProjectDir(directory.toFile())
         .build();
   }
@@ -378,7 +373,7 @@ class RecursiveWrapperPluginTest {
   }
 
   private static List<String> getArguments(String... arguments) {
-    return Stream.concat(Stream.of("--stacktrace"), Arrays.stream(arguments))
+    return Stream.concat(Stream.of(":wrapper", "--stacktrace"), Arrays.stream(arguments))
         .collect(Collectors.toList());
   }
 
