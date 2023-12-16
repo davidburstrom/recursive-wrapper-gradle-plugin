@@ -26,9 +26,11 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.annotation.Nonnull;
 import org.gradle.testkit.runner.BuildResult;
 import org.gradle.testkit.runner.GradleRunner;
@@ -53,7 +55,7 @@ class RecursiveWrapperPluginTest {
     writeProjectBuildScriptWithPluginsBlock(projectDir);
 
     getGradleRunner(projectDir)
-        .withArguments(":wrapper", "--stacktrace", RecursiveWrapperPlugin.TESTING_PROPERTY_ARG)
+        .withArguments(getArguments(":wrapper", RecursiveWrapperPlugin.TESTING_PROPERTY_ARG))
         .build();
 
     assertWrapperPropertyEquals(
@@ -74,7 +76,7 @@ class RecursiveWrapperPluginTest {
     writeProjectBuildScriptWithPluginsBlock(projectDir);
 
     getGradleRunner(projectDir)
-        .withArguments(":wrapper", "--stacktrace", RecursiveWrapperPlugin.TESTING_PROPERTY_ARG)
+        .withArguments(getArguments(":wrapper", RecursiveWrapperPlugin.TESTING_PROPERTY_ARG))
         .build();
 
     assertWrapperPropertyEquals(
@@ -98,7 +100,7 @@ class RecursiveWrapperPluginTest {
     writeProjectBuildScriptWithPluginsBlock(projectDir);
 
     getGradleRunner(projectDir)
-        .withArguments(":wrapper", "--stacktrace", RecursiveWrapperPlugin.TESTING_PROPERTY_ARG)
+        .withArguments(getArguments(":wrapper", RecursiveWrapperPlugin.TESTING_PROPERTY_ARG))
         .build();
 
     assertWrapperPropertyEquals(
@@ -131,10 +133,8 @@ class RecursiveWrapperPluginTest {
 
     getGradleRunner(projectDir)
         .withArguments(
-            ":wrapper",
-            "--distribution-type=all",
-            "--stacktrace",
-            RecursiveWrapperPlugin.TESTING_PROPERTY_ARG)
+            getArguments(
+                ":wrapper", "--distribution-type=all", RecursiveWrapperPlugin.TESTING_PROPERTY_ARG))
         .build();
 
     assertWrapperPropertyEquals(
@@ -157,10 +157,8 @@ class RecursiveWrapperPluginTest {
 
     getGradleRunner(projectDir)
         .withArguments(
-            ":wrapper",
-            "--distribution-type=all",
-            "--stacktrace",
-            RecursiveWrapperPlugin.TESTING_PROPERTY_ARG)
+            getArguments(
+                ":wrapper", "--distribution-type=all", RecursiveWrapperPlugin.TESTING_PROPERTY_ARG))
         .build();
 
     assertWrapperPropertyEquals(
@@ -183,11 +181,11 @@ class RecursiveWrapperPluginTest {
 
     getGradleRunner(projectDir)
         .withArguments(
-            ":wrapper",
-            "--gradle-distribution-url=https://services.gradle.org/distributions/gradle-8.0.2-bin.zip",
-            "--gradle-distribution-sha256-sum=ff7bf6a86f09b9b2c40bb8f48b25fc19cf2b2664fd1d220cd7ab833ec758d0d7",
-            "--stacktrace",
-            RecursiveWrapperPlugin.TESTING_PROPERTY_ARG)
+            getArguments(
+                ":wrapper",
+                "--gradle-distribution-url=https://services.gradle.org/distributions/gradle-8.0.2-bin.zip",
+                "--gradle-distribution-sha256-sum=ff7bf6a86f09b9b2c40bb8f48b25fc19cf2b2664fd1d220cd7ab833ec758d0d7",
+                RecursiveWrapperPlugin.TESTING_PROPERTY_ARG))
         .build();
 
     assertWrapperPropertyEquals(
@@ -220,10 +218,8 @@ class RecursiveWrapperPluginTest {
 
     getGradleRunner(projectDir)
         .withArguments(
-            ":wrapper",
-            "--distribution-type=all",
-            "--stacktrace",
-            RecursiveWrapperPlugin.TESTING_PROPERTY_ARG)
+            getArguments(
+                ":wrapper", "--distribution-type=all", RecursiveWrapperPlugin.TESTING_PROPERTY_ARG))
         .build();
 
     assertWrapperPropertyEquals(
@@ -246,7 +242,7 @@ class RecursiveWrapperPluginTest {
     writeProjectBuildScriptWithPluginsBlock(projectDir);
 
     BuildResult buildResult =
-        getGradleRunner(projectDir).withArguments(":wrapper", "--stacktrace").buildAndFail();
+        getGradleRunner(projectDir).withArguments(getArguments(":wrapper")).buildAndFail();
 
     assertThat(buildResult.getOutput()).contains("which is the same");
   }
@@ -263,7 +259,7 @@ class RecursiveWrapperPluginTest {
 
     BuildResult buildResult =
         getGradleRunner(projectDir)
-            .withArguments(":wrapper", "--distribution-type=all", "--stacktrace")
+            .withArguments(getArguments(":wrapper", "--distribution-type=all"))
             .buildAndFail();
 
     assertThat(buildResult.getOutput())
@@ -313,10 +309,10 @@ class RecursiveWrapperPluginTest {
     BuildResult buildResult =
         getGradleRunner(projectDir)
             .withArguments(
-                ":wrapper",
-                "--stacktrace",
-                "--dependency-verification=lenient",
-                RecursiveWrapperPlugin.TESTING_PROPERTY_ARG)
+                getArguments(
+                    ":wrapper",
+                    "--dependency-verification=lenient",
+                    RecursiveWrapperPlugin.TESTING_PROPERTY_ARG))
             .build();
 
     assertThat(buildResult.getOutput()).contains("failed verification");
@@ -340,7 +336,7 @@ class RecursiveWrapperPluginTest {
 
     BuildResult buildResult =
         getGradleRunner(projectDir)
-            .withArguments(":wrapper", "--stacktrace", RecursiveWrapperPlugin.TESTING_PROPERTY_ARG)
+            .withArguments(getArguments(":wrapper", RecursiveWrapperPlugin.TESTING_PROPERTY_ARG))
             .buildAndFail();
 
     assertThat(buildResult.getOutput()).contains("failed verification");
@@ -368,7 +364,7 @@ class RecursiveWrapperPluginTest {
   /** Invokes Gradle in order to write the wrapper infrastructure in the given directory. */
   private static void bootstrapWrappers(final Path directory) {
     getGradleRunner(directory)
-        .withArguments(":wrapper", "--stacktrace")
+        .withArguments(getArguments(":wrapper"))
         .withProjectDir(directory.toFile())
         .build();
   }
@@ -379,6 +375,11 @@ class RecursiveWrapperPluginTest {
         .withPluginClasspath()
         .withProjectDir(projectDir.toFile())
         .withGradleVersion(System.getProperty("GRADLE_VERSION"));
+  }
+
+  private static List<String> getArguments(String... arguments) {
+    return Stream.concat(Stream.of("--stacktrace"), Arrays.stream(arguments))
+        .collect(Collectors.toList());
   }
 
   @Nonnull
