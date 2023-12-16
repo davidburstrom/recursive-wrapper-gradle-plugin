@@ -458,6 +458,8 @@ class RecursiveWrapperPluginTest {
 
     private void write() throws IOException {
       Files.write(
+          projectDir.resolve("gradle.properties"), "org.gradle.jvmargs=-Xmx128m\n".getBytes(UTF_8));
+      Files.write(
           projectDir.resolve("settings.gradle.kts"),
           getSettingsScriptWithPluginClasspath(
                   buildscriptBlockSnippets, settingsPreamble, settingsPostamble)
