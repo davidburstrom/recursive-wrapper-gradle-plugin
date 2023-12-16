@@ -58,6 +58,7 @@ tasks.withType<Test> {
     javaLauncher = javaToolchains.launcherFor {
         languageVersion = JavaLanguageVersion.of(11)
     }
+    maxHeapSize = "48m"
 }
 
 spotless {
