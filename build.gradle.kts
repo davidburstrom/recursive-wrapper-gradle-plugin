@@ -7,7 +7,7 @@ plugins {
     id("org.gradle.signing")
 }
 
-val errorProneVersion = "2.23.0"
+val errorProneVersion = "2.24.0"
 val googleJavaFormatVersion = "1.16.0"
 val ktlintVersion = "1.1.0"
 version = "0.1.0-SNAPSHOT"
