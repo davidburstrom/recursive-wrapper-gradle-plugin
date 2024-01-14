@@ -12,3 +12,6 @@ build
 
 # Ignore Vim swap files
 *.swp
+
+# Ignore Android Studio local files
+local.properties
