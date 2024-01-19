@@ -29,7 +29,7 @@ dependencies {
 
 dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter:5.10.1")
-    testImplementation("com.google.truth:truth:1.2.0")
+    testImplementation("com.google.truth:truth:1.3.0")
     testImplementation("com.vdurmont:semver4j:3.1.0")
     errorprone("com.google.errorprone:error_prone_core:$errorProneVersion")
 }
