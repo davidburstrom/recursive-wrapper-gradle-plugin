@@ -27,7 +27,7 @@ jobs:
           arguments: build --no-configuration-cache --no-daemon --stacktrace --continue
       - name: Publish build reports
         if: always()
-        uses: actions/upload-artifact@v4.2.0
+        uses: actions/upload-artifact@v4.3.0
         with:
           name: build-reports
           path: build/reports
