@@ -9,7 +9,7 @@ plugins {
 
 val errorProneVersion = "2.25.0"
 val googleJavaFormatVersion = "1.16.0"
-val ktlintVersion = "1.2.0"
+val ktlintVersion = "1.2.1"
 version = "0.1.0-SNAPSHOT"
 group = "io.github.davidburstrom.gradle.recursive-wrapper"
 val pluginId = "io.github.davidburstrom.recursive-wrapper"
