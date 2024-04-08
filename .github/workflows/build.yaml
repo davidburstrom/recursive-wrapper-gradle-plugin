@@ -22,7 +22,7 @@ jobs:
       - name: Validate Gradle wrapper
         uses: gradle/wrapper-validation-action@v2.1.2
       - name: Set up Gradle
-        uses: gradle/actions/setup-gradle@v3.2.0
+        uses: gradle/actions/setup-gradle@v3.2.1
       - name: Build with Gradle
         run: ./gradlew build --no-configuration-cache --no-daemon --stacktrace --continue
       - name: Publish build reports
