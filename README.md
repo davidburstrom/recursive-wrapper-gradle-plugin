@@ -47,7 +47,7 @@ The plugin has been tested on all Gradle versions from 6.0.1 to 8.7.
 
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
-Copyright 2023 David Burström.
+Copyright 2023-2024 David Burström.
 
 # Acknowledgements
 
