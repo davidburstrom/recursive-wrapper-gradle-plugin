@@ -75,7 +75,7 @@ spotless {
         licenseHeaderFile(rootProject.file("config/license-header.txt"))
     }
     kotlinGradle {
-        target("*.gradle.kts")
+        target("**/*.gradle.kts")
         ktlint(ktlintVersion).editorConfigOverride(mapOf("ktlint_standard_trailing-comma-on-call-site" to "disabled"))
     }
 }
