@@ -71,7 +71,7 @@ tasks.withType<Test> {
 
 spotless {
     java {
-        googleJavaFormat(googleJavaFormatVersion)
+        googleJavaFormat()
         licenseHeaderFile(rootProject.file("config/license-header.txt"))
     }
     kotlinGradle {
@@ -140,6 +140,7 @@ val constantsGenerator by tasks.registering {
         outputFile.writeText(
             licenseFile.readText() +
                 "package $packageName;\n" +
+                "\n" +
                 "/** Holds the current build version. */\n" +
                 "public final class Constants {\n" +
                 "  private Constants() {}\n" +
