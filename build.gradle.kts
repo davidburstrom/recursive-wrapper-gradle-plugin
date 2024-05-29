@@ -34,6 +34,14 @@ dependencies {
     errorprone("com.google.errorprone:error_prone_core:$errorProneVersion")
 }
 
+configure<JavaPluginExtension> {
+    toolchain {
+        // Could theoretically be version 8, but it's not compatible with
+        // ErrorProne. Therefore, the JavaCompile release option is used.
+        languageVersion = JavaLanguageVersion.of(11)
+    }
+}
+
 tasks.named<JavaCompile>("compileJava").configure {
     options.release = 8
 }
