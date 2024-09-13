@@ -38,7 +38,7 @@ configure<JavaPluginExtension> {
     toolchain {
         // Could theoretically be version 8, but it's not compatible with
         // ErrorProne. Therefore, the JavaCompile release option is used.
-        languageVersion = JavaLanguageVersion.of(11)
+        languageVersion = JavaLanguageVersion.of(17)
     }
 }
 
