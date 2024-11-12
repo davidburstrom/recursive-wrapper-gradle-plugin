@@ -32,7 +32,7 @@ In case the root project is using Gradle dependency verification, it is either n
 plugin verification information in the included builds, or to execute the wrapper task with
 `--dependency-verification=lenient`.
 
-The plugin has been tested on all Gradle versions from 6.0.1 to 8.10.
+The plugin has been tested on all Gradle versions from 6.0.1 to 8.11.
 
 ## Releases
 
