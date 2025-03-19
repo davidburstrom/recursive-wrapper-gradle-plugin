@@ -41,6 +41,7 @@ import org.junit.jupiter.api.io.TempDir;
  * ProjectBuilder from Gradle testfixtures does not have support for included builds,
  * therefore the GradleRunner is required. This makes it impossible to get mutation test coverage.
  */
+@SuppressWarnings("StringConcatToTextBlock")
 class RecursiveWrapperPluginTest {
 
   private static final List<? extends File> PLUGIN_CLASSPATH =
