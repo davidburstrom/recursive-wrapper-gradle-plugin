@@ -31,6 +31,7 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter:5.12.1")
     testImplementation("com.google.truth:truth:1.4.4")
     testImplementation("com.vdurmont:semver4j:3.1.0")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher:1.12.1")
     errorprone("com.google.errorprone:error_prone_core:$errorProneVersion")
 }
 
