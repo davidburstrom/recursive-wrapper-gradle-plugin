@@ -21,5 +21,5 @@ jobs:
         java-version: '11'
         distribution: temurin
     - name: Generate and submit dependency graph
-      uses: gradle/actions/dependency-submission@v4.3.1
+      uses: gradle/actions/dependency-submission@v4.4.0
 
