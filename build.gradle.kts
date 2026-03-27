@@ -65,7 +65,7 @@ tasks.test {
 
 tasks.withType<Test> {
     javaLauncher = javaToolchains.launcherFor {
-        languageVersion = JavaLanguageVersion.of(11)
+        languageVersion = JavaLanguageVersion.of(17)
     }
     maxHeapSize = "48m"
 }
@@ -85,7 +85,7 @@ versionCompatibility {
     tests {
         dimensions {
             register("Gradle") {
-                versions = listOf("6.0.1", "6.1.1", "6.2.2", "6.3", "6.4.1", "6.5.1", "6.6.1", "6.7.1", "6.8.3", "6.9.4", "7.0.2", "7.1.1", "7.2", "7.3.3", "7.4.2", "7.5.1", "7.6.3", "8.0.2", "8.1.1", "8.2.1", "8.3", "8.4", "8.5", "8.6", "8.7", "8.8", "8.9", "8.10.2", "8.11.1", "8.12.1", "8.13", "8.14.4")
+                versions = listOf("6.0.1", "6.1.1", "6.2.2", "6.3", "6.4.1", "6.5.1", "6.6.1", "6.7.1", "6.8.3", "6.9.4", "7.0.2", "7.1.1", "7.2", "7.3.3", "7.4.2", "7.5.1", "7.6.3", "8.0.2", "8.1.1", "8.2.1", "8.3", "8.4", "8.5", "8.6", "8.7", "8.8", "8.9", "8.10.2", "8.11.1", "8.12.1", "8.13", "8.14.4", "9.0.0", "9.1.0", "9.2.1", "9.3.1", "9.4.1")
                 if (GradleVersion.current().version !in versions.get()) {
                     throw GradleException("Could not find ${gradle.gradleVersion} in the compatibility test versions")
                 }
@@ -96,7 +96,7 @@ versionCompatibility {
 
             testTask.systemProperty("GRADLE_VERSION", gradleVersion)
             testTask.javaLauncher = javaToolchains.launcherFor {
-                languageVersion = JavaLanguageVersion.of(11)
+                languageVersion = JavaLanguageVersion.of(if (gradleVersion.startsWith("9.")) 17 else 11)
             }
         }
     }
